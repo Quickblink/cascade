@@ -340,8 +340,8 @@ jsPlumb.ready(function () {
     };
 
 
-    createDummyNode("indummy", {left: 15, top: 10, text:"Function Name", conType: "in"});
-    createDummyNode("outdummy", {left: 15, top: 80, conType: "out"});
+    createDummyNode("indummy", {left: 15, top: 10+150, text:"Function Name", conType: "in"});
+    createDummyNode("outdummy", {left: 15, top: 80+150, conType: "out"});
 
 
 
