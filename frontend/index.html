@@ -1,78 +1,41 @@
 <!doctype html>
 <html>
-    <head>
+<head>
 
-        <title>Cascade</title>
-        <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
-<!--        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-        <link href="//fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
+    <title>Cascade</title>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="style/style.css">
 
-        <link rel="stylesheet" href="../../css/jsplumbtoolkit-defaults.css">
-        <link rel="stylesheet" href="../../css/main.css">
-        <link rel="stylesheet" href="../../css/jsplumbtoolkit-demo.css">-->
-        <link rel="stylesheet" href="demo.css">
-
-    </head>
-    <body data-demo-id="flowchart">
+</head>
+<body data-demo-id="flowchart">
 
 
-            <div class="sidenav" id="sidenav">
+<div class="sidenav" id="sidenav">
 
-                <img src="logos/cascade_logo_text.svg" style="width: 100px; height: 100px; top:25px; left:50px; position: absolute">
-<!--
-                <div class="window jtk-node" id="flowchartWindow1"><strong>Test 1</strong><br/><br/></div>
--->
-
-            </div>
-
-            <div class="rightnav"></div>
-            <div class="bottomnav"></div>
+    <img src="logos/cascade_logo_text.svg" style="width: 100px; height: 100px; top:25px; left:50px; position: absolute">
 
 
-            <!--        <a style="margin:10px 0 0 10px;display:inline-block" href="https://jsplumbtoolkit.com"><img src="../../img/logo-jsplumb-green.png"></a>-->
+</div>
 
-<!--        <div class="jtk-demo-main">-->
-			<!-- demo -->
-            <div id="canvasClone" style="position:absolute; left:0;top:0;z-index: 20;transform-origin: 0% 0%"></div>
-            <div class="main" id="dragContainer" style="position:absolute; left:0;top:0">
-                <div id="selector" style="z-index: 2; width: 100%; height: 100%" oncontextmenu="return false;"></div>
-                <div class="jtk-demo-canvas canvas-wide flowchart-demo jtk-surface jtk-surface-nopan" id="canvas" style="position:absolute; left:0;top:0">
-<!--
-
-                </div>-->
+<div class="rightnav"></div>
+<div class="bottomnav"></div>
 
 
+<div id="canvasClone" style="position:absolute; left:0;top:0;z-index: 20;transform-origin: 0% 0%"></div>
+<div class="main" id="dragContainer" style="position:absolute; left:0;top:0">
+    <div id="selector" style="z-index: 2; width: 100%; height: 100%" oncontextmenu="return false;"></div>
+    <div class="jtk-demo-canvas canvas-wide flowchart-demo jtk-surface jtk-surface-nopan" id="canvas"
+         style="position:absolute; left:0;top:0"></div>
+
+    <!-- JS -->
+    <script src="lib/jsplumb_mod.js"></script>
+    <!-- /JS -->
+
+    <!--  demo code -->
+    <script type="module" src="mainscript.js"></script>
 
 
-<!--                <div class="window jtk-node" id="flowchartWindow1"><strong>Test 1</strong><br/><br/></div>
-                <div class="window jtk-node" id="flowchartWindow2"><strong>2</strong><br/><br/></div>
-                <div class="window jtk-node" id="flowchartWindow3"><strong>3</strong><br/><br/></div>
-                <div class="window jtk-node" id="flowchartWindow4"><strong>4</strong><br/><br/></div>
-                <div class="window" id="OutputWindow"><button type="button" id="OutputButton">Click Me!</button><div id="OutputText"></div></div>-->
-                </div>
-            </div>
-            <!-- /demo -->
-            <!-- explanation
-            <div class="description">
-                <h4>FLOWCHART</h4>
-                <p>Nodes are connected with the Flowchart connector.</p>
-                <p>Hover over connections to highlight them, click to delete. </p>
-                <p>Drag new connections from hollow dots to solid dots. You can also drag connections from their source/target to other sources/targets, or back onto themselves.</p>
-                <p>By default, Flowchart connectors have square corners, but by setting the 'cornerRadius' parameter, as we have here, you can get rounded corners.</p>
-            </div>
-             /explanation
-        </div> -->
-
-        <!-- JS -->
-        <script src="lib/jsplumb_mod.js"></script>
-        <!-- /JS -->
-
-        <!--  demo code -->
-        <script type="module" src="demo.js"></script>
-
-        <!-- demo list
-        <script src="../demo-list.js"></script> -->
-
-    </body>
+</body>
 </html>
