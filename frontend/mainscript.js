@@ -25,21 +25,31 @@ jsPlumb.ready(function () {
     var loadfromState = function(){
         /*output.style.left = stateM.context.output.left + "px";
         output.style.top = stateM.context.output.top + "px";*/
-        instance.reset();
+        //instance.reset();
 
-        instance.bind("connection", connectionHandler);
+        instance.silently(function() {
+            instance.deleteEveryEndpoint();
+            // console.log(instance);
+            // instance.targetEndpointDefinitions = {};
+            // instance.sourceEndpointDefinitions = {};
+            //connections.length = 0;
+        });
 
-        instance.bind("connectionDetached", connectionDetachedHandler);
+        //applyCanvasTransforms = applyCanvasTransforms.bind(instance);
 
-        instance.bind("connectionMoved", connectionMovedHandler);
+
 
         while(canvas.firstChild){
             canvas.firstChild.remove();
         }
 
+        // instance.setZoom(stateM.context.canvas.scale);
+
         instance.setSuspendDrawing(true);
 
         applyCanvasTransforms();
+
+
 
 
         for (var id in stateM.context.containers) {
@@ -88,7 +98,9 @@ jsPlumb.ready(function () {
         canvas.style.top = stateM.context.canvas.pos[1] + "px";
         canvas.style.transform = "scale("+stateM.context.canvas.scale+")";
         canvasClone.style.transform = "translatex("+stateM.context.canvas.pos[0]+"px) translatey("+stateM.context.canvas.pos[1]+"px) scale("+stateM.context.canvas.scale+")";
+        //console.log(instance.getZoom());
         instance.setZoom(stateM.context.canvas.scale);
+        //console.log(instance.getZoom());
     };
     
 
@@ -211,6 +223,13 @@ jsPlumb.ready(function () {
         stateM.commitChange(change);
         //console.log(info);
     };
+
+
+    instance.bind("connection", connectionHandler);
+
+    instance.bind("connectionDetached", connectionDetachedHandler);
+
+    instance.bind("connectionMoved", connectionMovedHandler);
 
 
     var nodeM = new NodeManager(stateM, instance, canvas, document.getElementById('sidenav'));

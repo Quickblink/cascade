@@ -46,7 +46,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
     def execute(self, message):
         self.vcnt = 1
-        self.code = 'pass'
+        self.code = 'v1=None'
         outwin = stateManager.context['containers'][message['id']]
         #print(state)
         if 'connections' in outwin and '1' in outwin['connections']:
@@ -70,7 +70,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 stateManager.jumpOut()
                 return res
             else:
-                return 333 #Error
+                stateManager.jumpOut()
+                return 1 #Error
         if dic[id]['conType'] == 'plugin':
             conId = stateManager.jumpOut()
             container = stateManager.context['containers'][conId]
@@ -79,7 +80,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 stateManager.jumpIn(conId)
                 return res
             else:
-                return 333 #Error
+                stateManager.jumpIn(conId)
+                return 1 #Error
         if 'varId' in dic[id]:
             return dic[id]['varId']
         dic[id]['varId'] = self.vcnt
@@ -108,7 +110,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 stateManager.jumpOut()
                 return res
             else:
-                return 333 #Error
+                stateManager.jumpOut()
+                return 1 #Error
         if dic[id]['conType'] == 'plugin':
             conId = stateManager.jumpOut()
             container = stateManager.context['containers'][conId]
@@ -117,7 +120,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 stateManager.jumpIn(conId)
                 return res
             else:
-                return 333 #Error
+                stateManager.jumpIn(conId)
+                return 1 #Error
         if 'varId' in dic[id]:
             del dic[id]['varId']
         if 'connections' in dic[id] and len(dic[id]['connections'])>0:
