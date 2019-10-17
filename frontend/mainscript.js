@@ -15,9 +15,20 @@ jsPlumb.ready(function () {
         DragOptions: { cursor: 'pointer', zIndex: 1 }
     });
 
+
+    var canvas = document.getElementById("canvas");
+
+    var dragContainer = document.getElementById("dragContainer"); //innercon
+
+    var canvasClone = document.getElementById("canvasClone");
+
     var loadfromState = function(){
         /*output.style.left = stateM.context.output.left + "px";
         output.style.top = stateM.context.output.top + "px";*/
+        instance.reset();
+        while(canvas.firstChild){
+            canvas.firstChild.remove();
+        }
 
         instance.setSuspendDrawing(true);
 
@@ -55,11 +66,7 @@ jsPlumb.ready(function () {
 
 
 
-    var canvas = document.getElementById("canvas");
 
-    var dragContainer = document.getElementById("dragContainer"); //innercon
-
-    var canvasClone = document.getElementById("canvasClone");
 
 
     var applyCanvasTransforms = function(){
@@ -198,10 +205,12 @@ jsPlumb.ready(function () {
                     var stateInfo = {
                         left: (params.finalPos[0] - stateM.context.canvas.pos[0]) / stateM.context.canvas.scale,
                         top: (params.finalPos[1] - stateM.context.canvas.pos[1]) / stateM.context.canvas.scale,
-                        text: id.substring(0, 7),
+                        //text: id.substring(0, 7),
                         conType: stateInfo2.conType
                     };
                     createNode(id, stateInfo);
+                    //console.log(stateInfo);
+                    //stateInfo is changed during createNode
                     var change = {path: ["containers", id], value: stateInfo};
                     stateM.commitChange(change);
                 }

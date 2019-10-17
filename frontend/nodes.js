@@ -16,6 +16,7 @@ class BaseNode{
 class InNode extends BaseNode{
     makeNode(){
         this.nodeM.dest.appendChild(this.d);
+        this.stateInfo.text = this.id.substring(0, 7);
         this.makeInput();
         this.input.addEventListener('keyup', function() {
             var change = {path:["containers",this.id], value:{text:this.input.value}};
@@ -53,7 +54,7 @@ class OutNode extends BaseNode{
         var exhttp = new XMLHttpRequest();
         this.button.onclick = function() {
             exhttp.open("POST", "http://localhost:3000", true);
-            exhttp.send(JSON.stringify({type:"execute", id: this.id}));
+            exhttp.send(JSON.stringify({type:"execute", body:{id: this.id}}));
         }.bind(this);
         var that = this;
         exhttp.onreadystatechange = function() {
@@ -65,6 +66,7 @@ class OutNode extends BaseNode{
         this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: "TopCenter", parameters:{n:1}});
 
     }
+
 
     makeDummy(){
         this.nodeM.dummydest.appendChild(this.d);
@@ -92,7 +94,56 @@ class OutNode extends BaseNode{
     }
 }
 
+class ContainerNode extends BaseNode{
+    makeNode(){
+        this.nodeM.dest.appendChild(this.d);
+        this.stateInfo.inner = {canvas: {pos:[0,0], scale:1}, containers: {}}; //TODO: add inner nodes
+        this.makeStuff();
+        this.button.onclick = function() {
+            this.nodeM.stateM.switchDown(this.id);
+        }.bind(this);
+    }
 
+    makeDummy(){
+        this.nodeM.dummydest.appendChild(this.d);
+        this.makeStuff();
+        this.button.disabled = true;
+    }
+
+    makeStuff(){
+        this.button = document.createElement("button");
+        this.button.type = "button";
+        this.button.innerText = "Step in";
+        this.d.appendChild(this.button); // put it into the DOM
+    }
+}
+
+class PlugNode extends BaseNode{
+    makeStuff(){
+        this.nodeM.dest.appendChild(this.d);
+        this.button = document.createElement("button");
+        this.button.type = "button";
+        this.button.innerText = "Step out";
+        this.button.onclick = function() {
+            this.nodeM.stateM.switchUp();
+        }.bind(this);
+        this.d.appendChild(this.button); // put it into the DOM
+    }
+}
+
+class PlugIn extends PlugNode{
+    makeNode(){
+        this.makeStuff();
+        //TODO: make source endpoints
+    }
+}
+
+class PlugOut extends PlugNode{
+    makeNode(){
+        this.makeStuff();
+        //TODO: make target endpoints
+    }
+}
 
 
 const createSwitch = function(id, stateInfo, nodeM) {
