@@ -43,11 +43,22 @@ class StateManager:
             out.write(json.dumps(self.state))
 
     def loadContext(self):
-        print('Context loaded.')
+        #print('Context loaded.')
         self.context = self.state['mainContext']
         for id in self.state['curContext']:
-            self.context = context['containers'][id]['inner']
+            self.context = self.context['containers'][id]['inner']
 
     def switchContext(self, newContext):
         self.state['curContext'] = newContext
         self.loadContext()
+        with open('state.json', 'w') as out:
+            out.write(json.dumps(self.state))
+
+    def jumpIn(self, id):
+        self.state['curContext'].append(id)
+        self.context = self.context['containers'][id]['inner']
+
+    def jumpOut(self):
+        id = self.state['curContext'].pop()
+        self.loadContext()
+        return id

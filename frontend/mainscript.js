@@ -26,6 +26,13 @@ jsPlumb.ready(function () {
         /*output.style.left = stateM.context.output.left + "px";
         output.style.top = stateM.context.output.top + "px";*/
         instance.reset();
+
+        instance.bind("connection", connectionHandler);
+
+        instance.bind("connectionDetached", connectionDetachedHandler);
+
+        instance.bind("connectionMoved", connectionMovedHandler);
+
         while(canvas.firstChild){
             canvas.firstChild.remove();
         }
@@ -50,7 +57,7 @@ jsPlumb.ready(function () {
                     //console.log('Trying to connect');
                     instance.connect({
                         target: endp,
-                        source: instance.selectEndpoints({source: stateM.context.containers[id].connections[n]}).get(0)
+                        source: getSourcePoint(stateM.context.containers[id].connections[n])
                     });
                 }
             }
@@ -63,8 +70,15 @@ jsPlumb.ready(function () {
     var stateM = new StateManager(loadfromState);
 
 
-
-
+    var getSourcePoint = function (dSource) {
+        var endlist = instance.selectEndpoints({source: dSource.id});
+        for (var i = 0; i < endlist.length; i++) {
+            if(endlist.get(i).getParameter('k') === dSource.k){
+                return endlist.get(i);
+            }
+        }
+        console.error('SourcePoint not found: '+JSON.stringify(dSource));
+    };
 
 
 
@@ -143,7 +157,7 @@ jsPlumb.ready(function () {
     };
 
     selector.addEventListener('mousedown', function (e) {
-        console.log(e);
+        //console.log(e);
         instance.clearDragSelection();
         if(e.button === 2){
 
@@ -173,26 +187,31 @@ jsPlumb.ready(function () {
 
 
 
-    instance.bind("connection", function (info, oe) {
+
+
+
+
+    var connectionHandler = function (info, oe) {
         if (!oe) return;
         //console.log(info.targetEndpoint.getParameter('n'), info.targetId);
-        var change = {path:["containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], value:info.sourceId};
+        var change = {path:["containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], value:{id: info.sourceId, k: info.sourceEndpoint.getParameter('k')+''}};
         stateM.commitChange(change);
         //console.log('Attached!');
-    });
+    };
 
-    instance.bind("connectionDetached", function (info) {
+    var connectionDetachedHandler = function (info) {
         //console.log('Detached!');
         var change = {path:["containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], delete:true};
         stateM.commitChange(change);
-    });
+    };
 
-    instance.bind("connectionMoved", function (info) {
+    var connectionMovedHandler = function (info) {
         //console.log('moved!');
         var change = {path:["containers",info.originalTargetId,"connections", info.originalTargetEndpoint.getParameter('n')+''], delete:true};
         stateM.commitChange(change);
         //console.log(info);
-    });
+    };
+
 
     var nodeM = new NodeManager(stateM, instance, canvas, document.getElementById('sidenav'));
 
@@ -230,18 +249,25 @@ jsPlumb.ready(function () {
 
     createDummyNode("indummy", {left: 15, top: 10+150, text:"Function Name", conType: "in"});
     createDummyNode("outdummy", {left: 15, top: 80+150, conType: "out"});
-
+    createDummyNode("containerDummy", {left: 15, top: 100+80+150, conType: "containerNode"});
 
 
     var createNode = function(id, stateInfo) {
         var d = nodeM.createNode(id, stateInfo);
 
-        // initialise draggable elements.
-        instance.draggable(d, {
-            start:function() {
-                canvasClone.appendChild(d);
-            },
-            stop:function(params) {
+        var stopfun;
+
+        if(stateInfo.conType === 'plugin' || stateInfo.conType === 'plugout'){
+            stopfun = function(params) {
+                canvas.appendChild(d);
+                var change = {
+                    path: ["containers", params.el.id],
+                    value: {left: params.finalPos[0], top: params.finalPos[1]}
+                };
+                stateM.commitChange(change);
+            };
+        }else{
+            stopfun = function(params) {
                 // console.log(params);
                 canvas.appendChild(d);
                 if(params.e.x < 200){
@@ -255,7 +281,15 @@ jsPlumb.ready(function () {
                 }
 
                 //console.log(params);
-            }});
+            };
+        }
+
+        // initialise draggable elements.
+        instance.draggable(d, {
+            start:function() {
+                canvasClone.appendChild(d);
+            },
+            stop:stopfun});
 
         // return d;
     };

@@ -10,23 +10,33 @@ class BaseNode{
         this.d.id = id;
         this.d.style.left = stateInfo.left + "px";
         this.d.style.top = stateInfo.top + "px";
+        var standards = this.getStandards();
+        for (var attrname in standards) {
+            if(!this.stateInfo[attrname]){
+                this.stateInfo[attrname] = standards[attrname];
+            }
+        }
+    }
+
+    getStandards(){
+        return {};
     }
 }
 
 class InNode extends BaseNode{
     makeNode(){
         this.nodeM.dest.appendChild(this.d);
-        this.stateInfo.text = this.id.substring(0, 7);
+        // this.stateInfo.text = this.id.substring(0, 7);
         this.makeInput();
         this.input.addEventListener('keyup', function() {
             var change = {path:["containers",this.id], value:{text:this.input.value}};
             this.nodeM.stateM.commitChange(change);
         }.bind(this));
 
-        this.nodeM.plumbInstance.addEndpoint(this.id, sourceEndpoint);
+        this.nodeM.plumbInstance.addEndpoint(this.id, sourceEndpoint, {parameters:{k:'1'}});
         const n = 4;
         for (var j = 1; j < n + 1; j++) {
-            this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: [j/(n+1),0,0,-1], parameters:{n:j}});
+            this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: [j/(n+1),0,0,-1], parameters:{n:j+''}});
         }
     }
 
@@ -43,6 +53,11 @@ class InNode extends BaseNode{
         this.input.value = this.stateInfo.text;
         this.d.appendChild(this.input);
     }
+
+    getStandards() {
+        return {text: this.id.substring(0, 7)};
+    }
+
 }
 
 
@@ -63,7 +78,7 @@ class OutNode extends BaseNode{
             }
         };
 
-        this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: "TopCenter", parameters:{n:1}});
+        this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: "TopCenter", parameters:{n:'1'}});
 
     }
 
@@ -97,11 +112,23 @@ class OutNode extends BaseNode{
 class ContainerNode extends BaseNode{
     makeNode(){
         this.nodeM.dest.appendChild(this.d);
-        this.stateInfo.inner = {canvas: {pos:[0,0], scale:1}, containers: {}}; //TODO: add inner nodes
+
+        //this.stateInfo.inner = {canvas: {pos:[0,0], scale:1}, containers: {plugin: {left: 500, top: 100, conType: 'plugin'},
+        //                                                                    plugout: {left: 500, top: 800, conType: 'plugout'}}}; //TODO: add inner nodes
         this.makeStuff();
         this.button.onclick = function() {
             this.nodeM.stateM.switchDown(this.id);
         }.bind(this);
+
+        const n = 4;
+        for (var j = 1; j < n + 1; j++) {
+            this.nodeM.plumbInstance.addEndpoint(this.id, { anchor: [j/(n+1),1,0,1], parameters:{k:j+''}}, sourceEndpoint);
+        }
+
+        for (var j = 1; j < n + 1; j++) {
+            this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: [j/(n+1),0,0,-1], parameters:{n:j+''}});
+        }
+
     }
 
     makeDummy(){
@@ -116,6 +143,12 @@ class ContainerNode extends BaseNode{
         this.button.innerText = "Step in";
         this.d.appendChild(this.button); // put it into the DOM
     }
+
+    getStandards() {
+        return {inner: {canvas: {pos:[0,0], scale:1}, containers: {plugin: {left: 500, top: 100, conType: 'plugin'},
+                    plugout: {left: 500, top: 800, conType: 'plugout'}}}};
+    }
+
 }
 
 class PlugNode extends BaseNode{
@@ -134,14 +167,20 @@ class PlugNode extends BaseNode{
 class PlugIn extends PlugNode{
     makeNode(){
         this.makeStuff();
-        //TODO: make source endpoints
+        const n = 4;
+        for (var j = 1; j < n + 1; j++) {
+            this.nodeM.plumbInstance.addEndpoint(this.id, { anchor: [j/(n+1),1,0,1], parameters:{k:j+''}}, sourceEndpoint);
+        }
     }
 }
 
 class PlugOut extends PlugNode{
     makeNode(){
         this.makeStuff();
-        //TODO: make target endpoints
+        const n = 4;
+        for (var j = 1; j < n + 1; j++) {
+            this.nodeM.plumbInstance.addEndpoint(this.id, targetEndpoint, { anchor: [j/(n+1),0,0,-1], parameters:{n:j+''}});
+        }
     }
 }
 
@@ -152,6 +191,12 @@ const createSwitch = function(id, stateInfo, nodeM) {
             return new OutNode(id, stateInfo, nodeM);
         case "in":
             return new InNode(id, stateInfo, nodeM);
+        case "containerNode":
+            return new ContainerNode(id, stateInfo, nodeM);
+        case "plugin":
+            return new PlugIn(id, stateInfo, nodeM);
+        case "plugout":
+            return new PlugOut(id, stateInfo, nodeM);
         default:
             console.error("Tried to create unsupported node of type " + stateInfo.conType);
     }

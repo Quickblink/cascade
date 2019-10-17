@@ -57,10 +57,29 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             print(self.code)
             exec(self.code, vars)
             self.wfile.write(bytes(str(vars['v1']),  'utf-8'))
-            print('Message sent!')
+            #print('Message sent!')
 
-    def rec(self, id):
+    def rec(self, src):
+        id = src['id']
         dic = stateManager.context['containers']
+        if dic[id]['conType'] == 'containerNode':
+            stateManager.jumpIn(id)
+            plugout = stateManager.context['containers']['plugout']
+            if 'connections' in plugout and src['k'] in plugout['connections']:
+                res = self.rec(plugout['connections'][src['k']])
+                stateManager.jumpOut()
+                return res
+            else:
+                return 333 #Error
+        if dic[id]['conType'] == 'plugin':
+            conId = stateManager.jumpOut()
+            container = stateManager.context['containers'][conId]
+            if 'connections' in container and src['k'] in container['connections']:
+                res = self.rec(container['connections'][src['k']])
+                stateManager.jumpIn(conId)
+                return res
+            else:
+                return 333 #Error
         if 'varId' in dic[id]:
             return dic[id]['varId']
         dic[id]['varId'] = self.vcnt
@@ -78,8 +97,27 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         self.code += tcode
         return dic[id]['varId']
 
-    def clr(self, id):
+    def clr(self, src):
+        id = src['id']
         dic = stateManager.context['containers']
+        if dic[id]['conType'] == 'containerNode':
+            stateManager.jumpIn(id)
+            plugout = stateManager.context['containers']['plugout']
+            if 'connections' in plugout and src['k'] in plugout['connections']:
+                res = self.clr(plugout['connections'][src['k']])
+                stateManager.jumpOut()
+                return res
+            else:
+                return 333 #Error
+        if dic[id]['conType'] == 'plugin':
+            conId = stateManager.jumpOut()
+            container = stateManager.context['containers'][conId]
+            if 'connections' in container and src['k'] in container['connections']:
+                res = self.clr(container['connections'][src['k']])
+                stateManager.jumpIn(conId)
+                return res
+            else:
+                return 333 #Error
         if 'varId' in dic[id]:
             del dic[id]['varId']
         if 'connections' in dic[id] and len(dic[id]['connections'])>0:
