@@ -29,7 +29,7 @@ class InNode extends BaseNode{
         // this.stateInfo.text = this.id.substring(0, 7);
         this.makeInput();
         this.input.addEventListener('keyup', function() {
-            var change = {path:["containers",this.id], value:{text:this.input.value}};
+            var change = {path:["context","containers",this.id], value:{text:this.input.value}};
             this.nodeM.stateM.commitChange(change);
         }.bind(this));
 

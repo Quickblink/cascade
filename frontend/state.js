@@ -1,3 +1,27 @@
+/* type, body
+
+   type: execute, body:
+        id: output element id
+
+   type: contextSwitch, body:
+        newContext: list of context path
+
+   type: update, body:
+        path: list of dict keys
+        value: new value
+        delete: boolean
+        strict: boolean, replace old value, otherwise merge
+        deep: boolean, merge deeply
+*
+*
+*   changes: start path with context/state
+        mode: 'replace', 'merge', 'deep merge', 'insert', 'delete'
+*       sourceMode: 'copy', 'move', undefined
+*
+* */
+
+//TODO: change all commits to new style, implement source
+
 
 const isObject = function(obj) {
     return typeof obj === 'object' && !!obj;
@@ -6,6 +30,20 @@ const isObject = function(obj) {
 const joinObjects = function(obj1, obj2, deep){
     // TODO: add deep merge
     for (var attrname in obj2) { obj1[attrname] = obj2[attrname];}
+};
+
+const followPath = function (dict, path) {
+    for (var i = 0; i < path.length - 1; i++) {
+        if (!isObject(dict[path[i]])){
+            if(typeof path[i+1] === 'string'){
+                dict[path[i]] = {};
+            }else{
+                dict[path[i]] = [];
+            }
+        }
+        dict = dict[path[i]];
+    }
+    return dict;
 };
 
 
@@ -55,27 +93,59 @@ export class StateManager{
     }
 
     commitChange(change) {
+
+        if(!change.mode){
+            change.mode = 'merge';
+        }
+
         //queue and send json, flush queue
         this.xhttp.open("POST", "http://localhost:3000", true);
         this.xhttp.send(JSON.stringify({type:"update", body: change}));
 
-        var dest = this.context;
-        for (var i = 0; i < change.path.length - 1; i++) {
-            if (!isObject(dest[change.path[i]])){
-                dest[change.path[i]] = {};
-            }
-            dest = dest[change.path[i]];
-        }
+        var dest = followPath(this, change.path);
         //console.log(change.path[change.path.length-1]);
         var last = change.path[change.path.length-1];
-        if (change.delete){
-            //dest[last] = undefined;
-            delete dest[last];
-        }else if (change.strict || !isObject(dest[last])){
-            dest[last] = change.value;
-        }else{
-            joinObjects(dest[last], change.value, change.deep);
+        
+        var value = change.value;
+
+        if(change.sourceMode){
+            var src = followPath(this, change.value);
+            var srcKey = change.value[change.value.length-1];
+            value = src[srcKey];
+            if(change.sourceMode === 'move'){
+                if(Array.isArray(src)){
+                    src.splice(srcKey, 1);
+                }else{
+                    delete src[srcKey];
+                }
+            }
         }
+
+        switch (change.mode) {
+            case 'delete':
+                if(Array.isArray(dest)){
+                    dest.splice(last, 1);
+                }else{
+                    delete dest[last];
+                }
+                break;
+            case 'merge':
+                if(isObject(dest[last])){ //TODO: handle list merge
+                    joinObjects(dest[last], value, false);
+                    break;
+                }
+            case 'replace':
+                dest[last] = value;
+                break;
+            case 'insert':
+                dest.splice(last, 0, value);
+                break;
+            default:
+                console.error('Used unknown commit mode.');
+
+        }
+
+
     }
 
 

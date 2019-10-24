@@ -1,7 +1,29 @@
 import {StateManager} from "./state.js";
 import {NodeManager} from "./nodes.js";
+import Sortable from '/lib/sortable.esm.js';
+
 
 jsPlumb.ready(function () {
+
+
+    var sortable = Sortable.create(document.getElementById('coderesource'), {  group: {
+            name: 'g',
+            pull: 'clone',
+            put: false,
+            revertClone: true
+        },
+        sort: false,
+        onRemove: function(evt){
+            //console.log(evt);
+            if(evt.oldIndex == 0){
+                Sortable.create(evt.item.querySelector('.coderight'), {group:'g'});
+            }
+        }});
+
+    var sortable = Sortable.create(document.getElementById('codecontainer'), {group:'g'});
+
+    //var sortable2 = Sortable.create(document.getElementById('innerList'), {group:'g'}); //, handle: '.handle'
+
 
     var instance = window.jsp = jsPlumb.getInstance({
         // default drag options
@@ -107,7 +129,7 @@ jsPlumb.ready(function () {
 
     secondini.draggable(dragContainer ,{
         stop:function(params) {
-            var change = {path:["canvas","pos"], value:[stateM.context.canvas.pos[0]+params.finalPos[0], stateM.context.canvas.pos[1]+params.finalPos[1]]};
+            var change = {path:["context", "canvas","pos"], value:[stateM.context.canvas.pos[0]+params.finalPos[0], stateM.context.canvas.pos[1]+params.finalPos[1]]};
             stateM.commitChange(change);
             applyCanvasTransforms();
             params.el.style.left = 0;
@@ -118,9 +140,9 @@ jsPlumb.ready(function () {
     dragContainer.addEventListener('wheel', function(e) {
         var change;
         if (e.deltaY < 0){
-            change = {path:["canvas"], value:{pos:[1.1*stateM.context.canvas.pos[0]-0.1*e.x, 1.1*stateM.context.canvas.pos[1]-0.1*e.y], scale: stateM.context.canvas.scale * 1.1}};
+            change = {path:["context", "canvas"], value:{pos:[1.1*stateM.context.canvas.pos[0]-0.1*e.x, 1.1*stateM.context.canvas.pos[1]-0.1*e.y], scale: stateM.context.canvas.scale * 1.1}};
         }else{
-            change = {path:["canvas"], value:{pos:[(stateM.context.canvas.pos[0]+0.1*e.x)/1.1, (stateM.context.canvas.pos[1]+0.1*e.y)/1.1], scale: stateM.context.canvas.scale / 1.1}};
+            change = {path:["context", "canvas"], value:{pos:[(stateM.context.canvas.pos[0]+0.1*e.x)/1.1, (stateM.context.canvas.pos[1]+0.1*e.y)/1.1], scale: stateM.context.canvas.scale / 1.1}};
         }
         stateM.commitChange(change);
         applyCanvasTransforms();
@@ -206,20 +228,20 @@ jsPlumb.ready(function () {
     var connectionHandler = function (info, oe) {
         if (!oe) return;
         //console.log(info.targetEndpoint.getParameter('n'), info.targetId);
-        var change = {path:["containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], value:{id: info.sourceId, k: info.sourceEndpoint.getParameter('k')+''}};
+        var change = {path:["context", "containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], value:{id: info.sourceId, k: info.sourceEndpoint.getParameter('k')+''}};
         stateM.commitChange(change);
         //console.log('Attached!');
     };
 
     var connectionDetachedHandler = function (info) {
         //console.log('Detached!');
-        var change = {path:["containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], delete:true};
+        var change = {path:["context", "containers",info.targetId,"connections", info.targetEndpoint.getParameter('n')+''], mode:'delete'};
         stateM.commitChange(change);
     };
 
     var connectionMovedHandler = function (info) {
         //console.log('moved!');
-        var change = {path:["containers",info.originalTargetId,"connections", info.originalTargetEndpoint.getParameter('n')+''], delete:true};
+        var change = {path:["context", "containers",info.originalTargetId,"connections", info.originalTargetEndpoint.getParameter('n')+''], mode:'delete'};
         stateM.commitChange(change);
         //console.log(info);
     };
@@ -249,7 +271,7 @@ jsPlumb.ready(function () {
                     createNode(id, stateInfo);
                     //console.log(stateInfo);
                     //stateInfo is changed during createNode
-                    var change = {path: ["containers", id], value: stateInfo};
+                    var change = {path: ["context", "containers", id], value: stateInfo};
                     stateM.commitChange(change);
                 }
                 //console.log('drag', params);
@@ -280,7 +302,7 @@ jsPlumb.ready(function () {
             stopfun = function(params) {
                 canvas.appendChild(d);
                 var change = {
-                    path: ["containers", params.el.id],
+                    path: ["context", "containers", params.el.id],
                     value: {left: params.finalPos[0], top: params.finalPos[1]}
                 };
                 stateM.commitChange(change);
@@ -292,10 +314,10 @@ jsPlumb.ready(function () {
                 if(params.e.x < 200){
                     //not necessary to delete connections cause events
                     instance.remove(params.el.id);
-                    var change = {path:["containers",params.el.id], delete:true};
+                    var change = {path:["context", "containers",params.el.id], mode:'delete'};
                     stateM.commitChange(change);
                 }else{
-                    var change = {path:["containers",params.el.id], value:{left:params.finalPos[0],top:params.finalPos[1]}};
+                    var change = {path:["context", "containers",params.el.id], value:{left:params.finalPos[0],top:params.finalPos[1]}};
                     stateM.commitChange(change);
                 }
 
