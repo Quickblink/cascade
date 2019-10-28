@@ -1,28 +1,115 @@
 import {StateManager} from "./state.js";
 import {NodeManager} from "./nodes.js";
-import Sortable from '/lib/sortable.esm.js';
+import {Sortable, OnSpill} from '/lib/sortable.core.esm.js';
 
+Sortable.mount(OnSpill);
 
 jsPlumb.ready(function () {
 
+    //TODO: create elements from extra html files like angular components
 
-    var sortable = Sortable.create(document.getElementById('coderesource'), {  group: {
+    var coderesource = document.getElementById('coderesource');
+
+    var codecontainer = document.getElementById('codecontainer');
+
+
+
+    //var someloop = coderesource.querySelector('.loopblock');
+
+    //someloop.mytest = 'Hello World!';
+
+    //codecontainer.appendChild(Sortable.utils.clone(someloop));
+
+    //var sortable2 = Sortable.create(document.getElementById('innerList'), {group:'g'}); //, handle: '.handle'
+
+
+
+    var onNew = function(evt){ //onRemove from coderesource
+        if(evt.item.classList.contains('loopblock')){
+            Sortable.create(evt.item.querySelector('.coderight'), sortconfig);
+        }
+
+        var path = getRoutinePath(evt.to);
+        path.push(evt.newIndex);
+        var change = {path:path, value:{class: evt.item.classList[0]}, mode: 'insert'};
+        stateM.commitChange(change);
+    };
+
+    var onDelete = function(evt){
+        evt.item.parentNode.removeChild(evt.item);
+        var path = getRoutinePath(evt.from);// ["state", "routine"].concat(evt.from.mypath);
+        path.push(evt.oldIndex);
+        var change = {path:path, mode: 'delete'};
+        stateM.commitChange(change);
+    };
+
+    var onMove = function(evt){
+        console.log(evt);
+        var pathFrom = getRoutinePath(evt.from); // ["state", "routine"].concat(evt.from.mypath);
+        pathFrom.push(evt.oldIndex);
+        var pathTo = getRoutinePath(evt.to); // ["state", "routine"].concat(evt.to.mypath);
+        pathTo.push(evt.newIndex);
+        var change = {path: pathTo, value: pathFrom, mode: 'insert', sourceMode: 'move'};
+        stateM.commitChange(change);
+    };
+
+    var sortconfig = {
+        group:'g',
+        onRemove: onMove,
+        onUpdate: onMove,
+        onSpill: onDelete,
+        removeOnSpill: true};
+
+
+    Sortable.create(coderesource, {  group: {
             name: 'g',
             pull: 'clone',
             put: false,
             revertClone: true
         },
         sort: false,
-        onRemove: function(evt){
-            //console.log(evt);
-            if(evt.oldIndex == 0){
-                Sortable.create(evt.item.querySelector('.coderight'), {group:'g'});
+        onRemove: onNew});
+
+    var codesortable = Sortable.create(codecontainer, sortconfig);
+
+
+    var recRoutineLoad = function(container, context){
+        if(!context) return;
+        for(var i = 0; i < context.length; i++){
+            var newItem = Sortable.utils.clone(coderesource.querySelector('.'+context[i].class));
+            container.appendChild(newItem);
+            if(newItem.classList.contains('loopblock')){
+                var innerContainer = newItem.querySelector('.coderight');
+                Sortable.create(innerContainer, sortconfig);
+                recRoutineLoad(innerContainer, context[i].body);
             }
-        }});
+        }
+    };
 
-    var sortable = Sortable.create(document.getElementById('codecontainer'), {group:'g'});
+    var loadRoutine = function(){
+        console.log('Loading Routine');
+        recRoutineLoad(codecontainer, stateM.state.routine);
+        console.log(codesortable.toArray());
+    };
 
-    //var sortable2 = Sortable.create(document.getElementById('innerList'), {group:'g'}); //, handle: '.handle'
+
+    var getRoutinePath = function(el){
+        if(el === codecontainer){
+            return ["state", "routine"];
+        }
+        var upperItem = el.parentNode.parentNode;
+        var path = getRoutinePath(upperItem.parentNode);
+        var i=0;
+        while(upperItem.previousElementSibling) {
+            upperItem=upperItem.previousElementSibling;
+            i++;
+        }
+        path.push(i);
+        path.push('body');
+        return path;
+    };
+
+
 
 
     var instance = window.jsp = jsPlumb.getInstance({
@@ -99,7 +186,7 @@ jsPlumb.ready(function () {
 
     };
 
-    var stateM = new StateManager(loadfromState);
+    var stateM = new StateManager(loadfromState, loadRoutine);
 
 
     var getSourcePoint = function (dSource) {

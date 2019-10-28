@@ -48,7 +48,7 @@ const followPath = function (dict, path) {
 
 
 export class StateManager{
-    constructor(callback){
+    constructor(callback, routineCallback){
         var jsonFile = new XMLHttpRequest();
         jsonFile.open("GET","http://localhost:3000/state.json?"+ new Date().getTime(),true);
         jsonFile.send();
@@ -62,6 +62,7 @@ export class StateManager{
                 console.log('JSON loaded');
                 this.state = JSON.parse(jsonFile.responseText);
                 this.loadContext();
+                routineCallback();
             }
         }.bind(this);
     }
@@ -98,17 +99,24 @@ export class StateManager{
             change.mode = 'merge';
         }
 
+        console.log(change);
+
         //queue and send json, flush queue
         this.xhttp.open("POST", "http://localhost:3000", true);
         this.xhttp.send(JSON.stringify({type:"update", body: change}));
 
-        var dest = followPath(this, change.path);
+        var dest = undefined;
         //console.log(change.path[change.path.length-1]);
         var last = change.path[change.path.length-1];
         
         var value = change.value;
 
         if(change.sourceMode){
+            if(change.value.length > change.path.length && change.mode === 'insert'){
+                dest = followPath(this, change.path);
+                dest.splice(last, 0, undefined);
+                change.mode = 'replace';
+            }
             var src = followPath(this, change.value);
             var srcKey = change.value[change.value.length-1];
             value = src[srcKey];
@@ -119,6 +127,10 @@ export class StateManager{
                     delete src[srcKey];
                 }
             }
+        }
+
+        if(!dest){
+            dest = followPath(this, change.path);
         }
 
         switch (change.mode) {
@@ -144,6 +156,8 @@ export class StateManager{
                 console.error('Used unknown commit mode.');
 
         }
+
+
 
 
     }

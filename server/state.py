@@ -40,25 +40,32 @@ class StateManager:
     def commit(self, change):
         print(change)
         print('')
-        dest = self.followPath(change['path'])
+        dest = None
         last = change['path'][-1]
         value = change['value'] if 'value' in change else None
         
         if 'sourceMode' in change:
+            if len(change['value']) > len(change['path']) and change['mode'] == 'insert':
+                dest = self.followPath(change['path'])
+                dest.insert(last, value)
+                change['mode'] = 'replace'
             src = self.followPath(change['value'])
             srcKey = change['value'][-1]
             value = src[srcKey]
-            if change['sourceMode'] == 'move':
+            if 'sourceMode' in change and change['sourceMode'] == 'move':
                 del src[srcKey]
-        
+                
+        dest = dest or self.followPath(change['path'])
+
         if change['mode'] == 'delete':
             del dest[last]
         elif change['mode'] == 'insert':
             dest.insert(last, value)
         elif change['mode'] == 'merge' and not isNone(dest, last) and isObject(dest, last):
-            joinObjects(dest[last], change['value'], False)
+            joinObjects(dest[last], value, False)
         else:
-            dest[last] = change['value']
+            dest[last] = value
+         
         with open('state.json', 'w') as out:
             out.write(json.dumps(self.state))
 
