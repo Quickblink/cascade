@@ -4,9 +4,13 @@ import {Sortable, OnSpill} from '/lib/sortable.core.esm.js';
 
 Sortable.mount(OnSpill);
 
+
+
+
 jsPlumb.ready(function () {
 
     //TODO: create elements from extra html files like angular components
+    document.addEventListener('click', function(evt){console.log(evt);});
 
     var coderesource = document.getElementById('coderesource');
 
@@ -70,7 +74,7 @@ jsPlumb.ready(function () {
         sort: false,
         onRemove: onNew});
 
-    var codesortable = Sortable.create(codecontainer, sortconfig);
+    Sortable.create(codecontainer, sortconfig);
 
 
     var recRoutineLoad = function(container, context){
@@ -89,25 +93,10 @@ jsPlumb.ready(function () {
     var loadRoutine = function(){
         console.log('Loading Routine');
         recRoutineLoad(codecontainer, stateM.state.routine);
-        console.log(codesortable.toArray());
     };
 
 
-    var getRoutinePath = function(el){
-        if(el === codecontainer){
-            return ["state", "routine"];
-        }
-        var upperItem = el.parentNode.parentNode;
-        var path = getRoutinePath(upperItem.parentNode);
-        var i=0;
-        while(upperItem.previousElementSibling) {
-            upperItem=upperItem.previousElementSibling;
-            i++;
-        }
-        path.push(i);
-        path.push('body');
-        return path;
-    };
+
 
 
 

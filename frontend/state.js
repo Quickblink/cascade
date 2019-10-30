@@ -19,8 +19,18 @@
 *       sourceMode: 'copy', 'move', undefined
 *
 * */
+/*
+export class Singleton {
+    constructor () {
+        if (!Singleton.instance) {
+            Singleton.instance = this
+        }
+        // Initialize object
+        return Singleton.instance
+    }
+    // Properties & Methods
+}*/
 
-//TODO: change all commits to new style, implement source
 
 
 const isObject = function(obj) {
@@ -32,7 +42,7 @@ const joinObjects = function(obj1, obj2, deep){
     for (var attrname in obj2) { obj1[attrname] = obj2[attrname];}
 };
 
-const followPath = function (dict, path) {
+export const followPath = function (dict, path) {
     for (var i = 0; i < path.length - 1; i++) {
         if (!isObject(dict[path[i]])){
             if(typeof path[i+1] === 'string'){
