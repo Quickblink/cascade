@@ -2,17 +2,27 @@ import http.server
 import socketserver
 from http import HTTPStatus
 import numpy as np
+import torch
 import json
 import os
-from state import StateManager
+import time
+from state import StateManager, follow
 
 PORT = 3000
 
 
 stateManager = StateManager()
 
+#make node id's in order n1,n2...
+#initialize all nodes (before every routine or seperately) (make initialization codeblock)
+#synth code and wrap with function
+#return immediately in rec when no parameters
 
+def toggle(ar):
+    ar[0] = not ar[0]
+    return ar[0]
 
+envi = {}
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
 
@@ -38,26 +48,86 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             self.execute(z['body'])
         elif z['type'] == 'contextSwitch':
             stateManager.switchContext(z['body'])
+        elif z['type'] == 'routine':
+            self.routine()
+        elif z['type'] == 'initialize':
+            self.initialize()
 
         #exec(y, vars)
         #self.wfile.write(bytes(str(vars['v1']),  'utf-8'))
         #print('Message sent!')
-
-
-    def execute(self, message):
+        
+    def routine(self):
+        global envi
+        self.parseInitialize()
+        #print(self.varCode)
+        time_start = time.time()
+        self.routineRec(stateManager.state['routine'])
+        print(time.time()-time_start)
+        newenvi = {}
+        for key in envi:
+            if key[:2] != 'fn':
+                newenvi[key] = envi[key]
+        envi = newenvi
+        #print(not envi)
+        
+    def routineRec(self, dic):
+        for item in dic:
+            if item['class'] == 'execute' and 'connected' in item and item['connected'] in stateManager.context['containers']:
+                if 'fn'+item['connected'] in envi:
+                    exec('v1=fn'+item['connected']+'()', envi)
+                else:
+                    self.onlyEx(item['connected'])
+            elif item['class'] == 'initialize':
+                global envi
+                envi = {'np':np, 'toggle':toggle, 't':torch}
+                exec(self.varCode, envi)
+            elif item['class'] == 'loopblock':
+                if 'body' in item and 'text' in item:
+                    for i in range(int(item['text'])):
+                        self.routineRec(item['body'])
+                
+    def initialize(self):
+        global envi
+        self.parseInitialize()
+        envi = {'np':np, 'toggle':toggle, 't':torch}
+        exec(self.varCode, envi)
+                
+    def parseInitialize(self):
+        self.varCode = 'pass'
+        self.initializeRec(stateManager.state['mainContext']['containers'])
+        
+    def initializeRec(self, dic):
+        for id, item in dic.items():
+            if item['conType'] == 'containerNode':
+                self.initializeRec(follow(item, ['inner', 'containers', 'dummyid']))
+            elif item['conType'] == 'in':
+                self.varCode += ';'+id+'='+item['text']
+                
+    def onlyEx(self, id):
+        #print(not envi)
         self.vcnt = 1
         self.code = 'v1=None'
-        outwin = stateManager.context['containers'][message['id']]
+        outwin = stateManager.context['containers'][id]
         #print(state)
-        if 'connections' in outwin and '1' in outwin['connections']:
-            pred = outwin['connections']['1']
-            self.clr(pred)
-            self.rec(pred)
-            vars = {'np':np}
-            print(self.code)
-            exec(self.code, vars)
-            self.wfile.write(bytes(str(vars['v1']),  'utf-8'))
-            #print('Message sent!')
+        if not ('connections' in outwin and '1' in outwin['connections']): return False
+        pred = outwin['connections']['1']
+        self.clr(pred)
+        self.rec(pred)
+        exec('def fn'+id+'():'+self.code+';return v1', envi)
+        exec('v1=fn'+id+'()', envi)
+        print(self.code)
+
+        #exec(self.code, envi)
+        return True
+        #self.wfile.write(bytes(str(vars['v1']),  'utf-8'))
+        #print('Message sent!')
+
+    def execute(self, message):
+        #print(not envi)
+        if self.onlyEx(message['id']):
+            self.wfile.write(bytes(str(envi['v1']),  'utf-8'))
+        
 
     def rec(self, src):
         id = src['id']
@@ -84,19 +154,19 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 return 1 #Error
         if 'varId' in dic[id]:
             return dic[id]['varId']
-        dic[id]['varId'] = self.vcnt
-        tcode = ";v"+str(self.vcnt)+"="+dic[id]['text']
-        self.vcnt += 1
+        dic[id]['varId'] = id
         if 'connections' in dic[id] and len(dic[id]['connections'])>0:
-            tcode += '('
+            dic[id]['varId'] = 'v'+str(self.vcnt)
+            tcode = ';'+dic[id]['varId']+'='+id+'('
+            self.vcnt += 1
             first = True
-            for srcId in dic[id]['connections'].values():
+            for k, srcId in sorted(dic[id]['connections'].items()):
                 if not first:
                     tcode += ','
                 first = False
-                tcode += 'v' + str(self.rec(srcId))
+                tcode += self.rec(srcId)
             tcode += ')'
-        self.code += tcode
+            self.code += tcode
         return dic[id]['varId']
 
     def clr(self, src):

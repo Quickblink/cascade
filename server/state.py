@@ -17,6 +17,13 @@ def isNone(obj, key):
         return not key in obj
     else:
         return key >= len(obj)
+        
+def follow(dest, path):
+    for i in range(len(path) - 1):
+        if isNone(dest, path[i]):
+            dest[path[i]] = {} if type(path[i+1]) is str else []
+        dest = dest[path[i]]
+    return dest
 
 class StateManager:
     def __init__(self):
@@ -24,18 +31,14 @@ class StateManager:
             with open(filename, 'r') as f:
                 self.state = json.loads(f.read())
         else:
-            self.state = {'curContext':[], 'mainContext':{'canvas': {'pos':[0,0], 'scale':1}}}
+            self.state = {'curContext':[], 'mainContext':{'canvas': {'pos':[0,0], 'scale':1}}, 'routine':[], 'idCounter':1}
             with open(filename, 'w') as out:
                 out.write(json.dumps(self.state))
         self.loadContext()
 
     def followPath(self, path):
         dest = self.state if path[0] == 'state' else self.context
-        for i in range(1, len(path) - 1):
-            if isNone(dest, path[i]):
-                dest[path[i]] = {} if type(path[i+1]) is str else []
-            dest = dest[path[i]]
-        return dest
+        return follow(dest, path[1:])
         
     def commit(self, change):
         print(change)

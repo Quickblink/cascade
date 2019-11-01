@@ -20,17 +20,24 @@
 *
 * */
 /*
-export class Singleton {
-    constructor () {
-        if (!Singleton.instance) {
-            Singleton.instance = this
-        }
-        // Initialize object
-        return Singleton.instance
+class Foo {
+  constructor(msg) {
+
+    if (Foo.instance) {
+      return Foo.instance;
     }
+    Foo.instance = this;
+  }
+}
     // Properties & Methods
 }*/
 
+import {CanvasManager} from "./canvas.js";
+import {RoutineManager} from "./routines.js";
+
+const canvasM = new CanvasManager();
+
+const routineM = new RoutineManager();
 
 
 const isObject = function(obj) {
@@ -58,12 +65,16 @@ export const followPath = function (dict, path) {
 
 
 export class StateManager{
-    constructor(callback, routineCallback){
+    constructor(){
+        if (StateManager.instance) {
+            return StateManager.instance;
+        }
+        StateManager.instance = this;
+
         var jsonFile = new XMLHttpRequest();
         jsonFile.open("GET","http://localhost:3000/state.json?"+ new Date().getTime(),true);
         jsonFile.send();
 
-        this.loadfromState = callback;
 
         this.xhttp = new XMLHttpRequest();
 
@@ -71,8 +82,14 @@ export class StateManager{
             if (jsonFile.readyState== 4 && jsonFile.status == 200) {
                 console.log('JSON loaded');
                 this.state = JSON.parse(jsonFile.responseText);
-                this.loadContext();
-                routineCallback();
+                jsPlumb.ready(function () {
+                    routineM.init();
+                    canvasM.init();
+                    this.loadContext();
+                    routineM.loadRoutine();
+                }.bind(this));
+
+                // routineCallback();
             }
         }.bind(this);
     }
@@ -82,7 +99,7 @@ export class StateManager{
         for (var i = 0; i < this.state.curContext.length; i++) {
             this.context = this.context.containers[this.state.curContext[i]].inner;
         }
-        this.loadfromState();
+        canvasM.loadContext();
     }
 
     switchDown(id){
@@ -174,3 +191,5 @@ export class StateManager{
 
 
 }
+
+new StateManager();
