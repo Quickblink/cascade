@@ -1,5 +1,7 @@
 import {StateManager, followPath} from "./state.js";
-import {Sortable, OnSpill} from '/lib/sortable.core.esm.js';
+import {Sortable, OnSpill} from '/home/eric/WebstormProjects/quickblink.github.io/cascade/lib/sortable.core.esm.js';
+import {FakeHTTP} from "./fake_server.js";
+
 
 Sortable.mount(OnSpill);
 
@@ -13,15 +15,15 @@ const codecontainer = document.getElementById('codecontainer');
 
 const routineButton = document.getElementById('routineButton');
 
-let exhttp = new XMLHttpRequest();
+let exhttp = new FakeHTTP();
 
 routineButton.addEventListener('click', function () {
-    exhttp.open("POST", "http://localhost:3000", true);
+    exhttp.open("POST", document.URL, true);
     exhttp.send(JSON.stringify({type:"routine"}));
 });
 
 document.getElementById('initializeButton').addEventListener('click', function () {
-    exhttp.open("POST", "http://localhost:3000", true);
+    exhttp.open("POST", document.URL, true);
     exhttp.send(JSON.stringify({type:"initialize"}));
 });
 

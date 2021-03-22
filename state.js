@@ -34,6 +34,9 @@ class Foo {
 
 import {CanvasManager} from "./canvas.js";
 import {RoutineManager} from "./routines.js";
+import {FakeServer, FakeHTTP} from "./fake_server.js";
+
+const fakeServer = new FakeServer();
 
 const canvasM = new CanvasManager();
 
@@ -72,16 +75,16 @@ export class StateManager{
         StateManager.instance = this;
 
         var jsonFile = new XMLHttpRequest();
-        jsonFile.open("GET","http://localhost:3000/state.json?"+ new Date().getTime(),true);
-        jsonFile.send();
+        jsonFile.open("GET",document.URL+"state.json?"+ new Date().getTime(),true);
 
 
-        this.xhttp = new XMLHttpRequest();
+        this.xhttp = new FakeHTTP();
 
         jsonFile.onreadystatechange = function() {
             if (jsonFile.readyState== 4 && jsonFile.status == 200) {
                 console.log('JSON loaded');
                 this.state = JSON.parse(jsonFile.responseText);
+                fakeServer.init(jsonFile.responseText);
                 jsPlumb.ready(function () {
                     routineM.init();
                     canvasM.init();
@@ -92,6 +95,8 @@ export class StateManager{
                 // routineCallback();
             }
         }.bind(this);
+        jsonFile.send();
+
     }
 
     loadContext(){
@@ -113,8 +118,8 @@ export class StateManager{
     }
 
     switchContext(newContext){
-        var exhttp = new XMLHttpRequest();
-        exhttp.open("POST", "http://localhost:3000", true);
+        var exhttp = new FakeHTTP();
+        exhttp.open("POST", document.URL, true);
         exhttp.send(JSON.stringify({type:"contextSwitch", body: newContext}));
         this.state.curContext = newContext;
         this.loadContext();
@@ -129,7 +134,7 @@ export class StateManager{
         console.log(change);
 
         //queue and send json, flush queue
-        this.xhttp.open("POST", "http://localhost:3000", true);
+        this.xhttp.open("POST", document.URL, true);
         this.xhttp.send(JSON.stringify({type:"update", body: change}));
 
         var dest = undefined;

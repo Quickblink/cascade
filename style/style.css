@@ -1,3 +1,18 @@
+.loadscreen {
+    height: 100%; /* 100% Full-height */
+    width: 100%; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: #fff; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    /* padding-top: 60px; /* Place content 60px from the top */
+    /* transition: 0.5s;  0.5 second transition effect to slide in the sidenav */
+    display: flex;
+}
+
+
 .sidenav {
     height: 100%; /* 100% Full-height */
     width: 200px; /* 0 width - change this with JavaScript */

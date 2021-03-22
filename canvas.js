@@ -1,6 +1,7 @@
 import {StateManager} from "./state.js";
 import {sourceEndpoint, targetEndpoint} from "./style/style.js";
 import {RoutineManager} from "./routines.js";
+import {FakeHTTP} from "./fake_server.js";
 
 
 /*
@@ -165,9 +166,9 @@ const build = {
             let button = makeButton(d, "Execute");
             let outtext = makeOuttext(d);
 
-            let exhttp = new XMLHttpRequest();
+            let exhttp = new FakeHTTP();
             button.onclick = function() {
-                exhttp.open("POST", "http://localhost:3000", true);
+                exhttp.open("POST", document.URL, true);
                 exhttp.send(JSON.stringify({type:"execute", body:{id: d.id}}));
             };
             exhttp.onreadystatechange = function() {
