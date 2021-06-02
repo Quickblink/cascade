@@ -25,10 +25,11 @@ exhttp.onreadystatechange = function() {
     }
 };
 
-routineButton.addEventListener('click', function () {
+routineButton.addEventListener('click', async function () {
+    statusText.innerText = 'Running... (May take roughly 2 minutes)'
+    await new Promise(r => setTimeout(r, 10));
     exhttp.open("POST", document.URL, true);
     exhttp.send(JSON.stringify({type:"routine"}));
-    statusText.innerText = 'Running...'
 });
 
 document.getElementById('initializeButton').addEventListener('click', function () {

@@ -40,6 +40,7 @@
 }
 
 .bottomnav {
+    display: none;
     height: 200px; /* 100% Full-height */
     position: fixed; /* Stay in place */
     z-index: 25; /* Stay on top */

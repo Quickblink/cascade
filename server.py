@@ -130,7 +130,7 @@ class MyHandler:
         elif z['type'] == 'contextSwitch':
             stateManager.switchContext(z['body'])
         elif z['type'] == 'routine':
-            self.routine()
+            return self.routine()
         elif z['type'] == 'initialize':
             self.initialize()
 
@@ -145,12 +145,12 @@ class MyHandler:
         time_start = time.time()
         self.routineRec(stateManager.state['routine'])
         print(time.time() - time_start)
-        self.wfile.write(bytes('finished',  'utf-8'))
         newenvi = {}
         for key in envi:
             if key[:2] != 'fn':
                 newenvi[key] = envi[key]
         envi = newenvi
+        return 'finished'
         # print(not envi)
 
     def routineRec(self, dic):
