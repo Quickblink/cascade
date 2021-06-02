@@ -202,9 +202,9 @@ const build = {
             let button = makeButton(d, "Execute");
             let plot = makePlot(d);
 
-            let exhttp = new XMLHttpRequest();
+            let exhttp = new FakeHTTP();
             button.onclick = function() {
-                exhttp.open("POST", "http://localhost:3000", true);
+                exhttp.open("POST", document.URL, true);
                 exhttp.send(JSON.stringify({type:"execute", body:{id: d.id}}));
             };
             exhttp.onreadystatechange = function() {
