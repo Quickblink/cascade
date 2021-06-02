@@ -3,7 +3,7 @@ import autograd.numpy as np
 import bintorch as torch
 import json
 import time
-import scipy
+from scipy.special import erf
 
 PORT = 3000
 
@@ -164,7 +164,7 @@ class MyHandler:
                 else:
                     self.onlyEx(item['connected'])
             elif item['class'] == 'initialize':
-                envi = {'np': np, 'toggle': toggle, 't': torch, 'sp': scipy}
+                envi = {'np': np, 'toggle': toggle, 't': torch, 'erf': erf}
                 exec(self.varCode, envi)
             elif item['class'] == 'loopblock':
                 if 'body' in item and 'text' in item:
@@ -174,7 +174,7 @@ class MyHandler:
     def initialize(self):
         global envi
         self.parseInitialize()
-        envi = {'np': np, 'toggle': toggle, 't': torch, 'sp': scipy}
+        envi = {'np': np, 'toggle': toggle, 't': torch, 'erf': erf}
         exec(self.varCode, envi)
 
     def parseInitialize(self):
