@@ -1,8 +1,8 @@
 import http.server
 import socketserver
 from http import HTTPStatus
-import numpy as np
-import torch
+import autograd.numpy as np
+import bintorch
 import json
 import os
 import time
@@ -64,6 +64,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         time_start = time.time()
         self.routineRec(stateManager.state['routine'])
         print(time.time()-time_start)
+        self.wfile.write(bytes('finished',  'utf-8'))
         newenvi = {}
         for key in envi:
             if key[:2] != 'fn':
@@ -80,7 +81,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.onlyEx(item['connected'])
             elif item['class'] == 'initialize':
-                envi = {'np':np, 'toggle':toggle, 't':torch}
+                envi = {'np':np, 'toggle':toggle, 't':bintorch}
                 exec(self.varCode, envi)
             elif item['class'] == 'loopblock':
                 if 'body' in item and 'text' in item:
@@ -90,7 +91,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
     def initialize(self):
         global envi
         self.parseInitialize()
-        envi = {'np':np, 'toggle':toggle, 't':torch}
+        envi = {'np':np, 'toggle':toggle, 't':bintorch}
         exec(self.varCode, envi)
                 
     def parseInitialize(self):

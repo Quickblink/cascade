@@ -13,11 +13,21 @@ const codecontainer = document.getElementById('codecontainer');
 
 const routineButton = document.getElementById('routineButton');
 
+const statusText = document.getElementById('statusText');
+
+
 let exhttp = new XMLHttpRequest();
+
+exhttp.onreadystatechange = function() {
+    if (exhttp.readyState== 4 && exhttp.status == 200 && this.responseText === 'finished') {
+        statusText.innerText = 'Finished!';
+    }
+};
 
 routineButton.addEventListener('click', function () {
     exhttp.open("POST", "http://localhost:3000", true);
     exhttp.send(JSON.stringify({type:"routine"}));
+    statusText.innerText = 'Running...'
 });
 
 document.getElementById('initializeButton').addEventListener('click', function () {

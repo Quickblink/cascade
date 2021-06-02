@@ -109,3 +109,8 @@ body{
     background-color: crimson;
 }
 
+#statusText {
+    margin: 10px;
+    padding: 5px;
+    background-color: white;
+}

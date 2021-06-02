@@ -179,7 +179,7 @@ const build = {
             };
             exhttp.onreadystatechange = function() {
                 if (exhttp.readyState== 4 && exhttp.status == 200) {
-                    outtext.innerHTML = this.responseText;
+                    outtext.innerText = this.responseText;
                 }
             };
             instance.addEndpoint(d.id, targetEndpoint, { anchor: "TopCenter", parameters:{n:'1'}});
@@ -214,7 +214,8 @@ const build = {
                         Plotly.purge(plot);
                         Plotly.newPlot(plot, [{
                                 x: response[0],
-                                y: response[1]
+                                y: response[1],
+                                mode: 'markers',
                             }],
                             {
                                 margin: {t: 30, l: 30, b: 30, r: 20}
