@@ -72,6 +72,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         #print(not envi)
         
     def routineRec(self, dic):
+        global envi
         for item in dic:
             if item['class'] == 'execute' and 'connected' in item and item['connected'] in stateManager.context['containers']:
                 if 'fn'+item['connected'] in envi:
@@ -79,7 +80,6 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.onlyEx(item['connected'])
             elif item['class'] == 'initialize':
-                global envi
                 envi = {'np':np, 'toggle':toggle, 't':torch}
                 exec(self.varCode, envi)
             elif item['class'] == 'loopblock':

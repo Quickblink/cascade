@@ -140,6 +140,13 @@ function makeOuttext(d) {
     return outtext;
 }
 
+function makePlot(d) {
+    let outtext = document.createElement("div");
+    outtext.className = 'plotholder';
+    d.appendChild(outtext); // put it into the DOM
+    return outtext;
+}
+
 const build = {
     in:{
         node: function (d, stateInfo) {
@@ -186,6 +193,48 @@ const build = {
         dummy: function (d, stateInfo) {
             let button = makeButton(d, "Execute");
             let outtext = makeOuttext(d);
+            button.disabled = true;
+        }
+    },
+    plot:{
+        node: function (d, stateInfo) {
+            let button = makeButton(d, "Execute");
+            let plot = makePlot(d);
+
+            let exhttp = new XMLHttpRequest();
+            button.onclick = function() {
+                exhttp.open("POST", "http://localhost:3000", true);
+                exhttp.send(JSON.stringify({type:"execute", body:{id: d.id}}));
+            };
+            exhttp.onreadystatechange = function() {
+                if (exhttp.readyState== 4 && exhttp.status == 200) {
+                    if (this.responseText !== ''){
+                        let response = JSON.parse(this.responseText);
+                        console.log(response)
+                        Plotly.purge(plot);
+                        Plotly.newPlot(plot, [{
+                                x: response[0],
+                                y: response[1]
+                            }],
+                            {
+                                margin: {t: 30, l: 30, b: 30, r: 20}
+                            }, {
+                                displayModeBar: true
+                            },);
+                    }
+                }
+            };
+            instance.addEndpoint(d.id, targetEndpoint, { anchor: "TopCenter", parameters:{n:'1'}});
+
+            d.addEventListener('click', function (evt) {
+                evt.mycatch = true;
+                routineM.connectNode(d.id);
+            });
+
+        },
+        dummy: function (d, stateInfo) {
+            let button = makeButton(d, "Execute");
+            let outtext = makePlot(d);
             button.disabled = true;
         }
     },
@@ -445,6 +494,7 @@ export class CanvasManager {
         buildDummy("indummy", {left: 15, top: 10+150, text:"Function Name", conType: "in"});
         buildDummy("outdummy", {left: 15, top: 80+150, conType: "out"});
         buildDummy("containerDummy", {left: 15, top: 100+80+150, conType: "containerNode"});
+        buildDummy("plotdummy", {left: -285, top: 80+100+80+150, conType: "plot"});
     }
 }
 
