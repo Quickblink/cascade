@@ -40,12 +40,26 @@
     text-align: initial;
 }
 
+
+.plot {
+    flex-direction: column;
+    height: 420px;
+    width: 450px;
+}
+
+.plot .plotholder{
+    border: 1px solid darkgrey;
+    height: 400px;
+    width: 100%;
+    text-align: initial;
+}
+
 .flowchart-demo .window:hover {
     box-shadow: 2px 2px 19px #444;
     -o-box-shadow: 2px 2px 19px #444;
     -webkit-box-shadow: 2px 2px 19px #444;
     -moz-box-shadow: 2px 2px 19px #444;
-    opacity: 0.6;
+    /*opacity: 0.6;*/
 }
 
 .flowchart-demo .active {

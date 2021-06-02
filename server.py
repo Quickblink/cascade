@@ -1,5 +1,5 @@
 import autograd
-import numpy as np
+import autograd.numpy as np
 import bintorch as torch
 import json
 import time
@@ -145,6 +145,7 @@ class MyHandler:
         time_start = time.time()
         self.routineRec(stateManager.state['routine'])
         print(time.time() - time_start)
+        self.wfile.write(bytes('finished',  'utf-8'))
         newenvi = {}
         for key in envi:
             if key[:2] != 'fn':
@@ -172,7 +173,7 @@ class MyHandler:
     def initialize(self):
         global envi
         self.parseInitialize()
-        envi = {'np': np, 'toggle': toggle, 't': torch}
+        envi = {'np':np, 'toggle':toggle, 't':torch}
         exec(self.varCode, envi)
 
     def parseInitialize(self):
