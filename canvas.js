@@ -211,13 +211,17 @@ const build = {
                 if (exhttp.readyState== 4 && exhttp.status == 200) {
                     if (this.responseText !== ''){
                         let response = JSON.parse(this.responseText);
-                        console.log(response)
-                        Plotly.purge(plot);
-                        Plotly.newPlot(plot, [{
-                                x: response[0],
-                                y: response[1],
+                        let plotlist = []
+                        for (let i = 0; i < response.length; i++) {
+                            plotlist.push({
+                                x: response[i][0],
+                                y: response[i][1],
                                 mode: 'markers',
-                            }],
+                            })
+                        }
+                        console.log(plotlist)
+                        Plotly.purge(plot);
+                        Plotly.newPlot(plot, plotlist,
                             {
                                 margin: {t: 30, l: 30, b: 30, r: 20}
                             }, {
@@ -493,10 +497,10 @@ export class CanvasManager {
         instance.bind("connection", connectionHandler);
         instance.bind("connectionDetached", connectionDetachedHandler);
         instance.bind("connectionMoved", connectionMovedHandler);
-        buildDummy("indummy", {left: 15, top: 10+150, text:"Function Name", conType: "in"});
-        buildDummy("outdummy", {left: 15, top: 80+150, conType: "out"});
-        buildDummy("containerDummy", {left: 15, top: 100+80+150, conType: "containerNode"});
-        buildDummy("plotdummy", {left: -285, top: 80+100+80+150, conType: "plot"});
+        buildDummy("indummy", {left: 15, top: 10+200, text:"Function Name", conType: "in"});
+        buildDummy("outdummy", {left: 15, top: 80+200, conType: "out"});
+        buildDummy("containerDummy", {left: 15, top: 100+80+200, conType: "containerNode"});
+        buildDummy("plotdummy", {left: -285, top: 80+100+80+200, conType: "plot"});
     }
 }
 
