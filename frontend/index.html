@@ -14,18 +14,19 @@
 <body data-demo-id="flowchart">
 
 
-    <div class="sidenav" id="sidenav">
+<div class="sidenav" id="sidenav">
 
         <img src="logos/cascade_logo_text.svg" style="width: 100px; height: 100px; top:25px; left:50px; position: absolute">
-
+    <div class="headline" style="margin-top: 160px">Graph Blocks</div>
 
     </div>
 
     <div class="rightnav">
+        <div class="headline">Routine Blocks</div>
         <div id="coderesource" class="codebox">
             <div class="loopblock">
                 <div class="codetop">
-                    <input class="loopinput" type="text" disabled>
+                    Loop for <input class="loopinput" type="text" disabled>
                 </div>
                 <div class="codebottom">
                     <div class="codeleft"></div>
@@ -35,6 +36,7 @@
             <div class="execute codeblock">Execute</div>
             <div class="initialize codeblock">Initialize</div>
         </div>
+        <div class="headline">Current Routine</div>
         <div id="codecontainer" class="codebox"></div>
         <button id="routineButton" type="button">Run Routine</button>
         <button id="initializeButton" type="button">Initialize</button>
