@@ -2,7 +2,7 @@ import http.server
 import socketserver
 from http import HTTPStatus
 import autograd.numpy as np
-import bintorch
+import bintorch as torch
 import json
 import os
 import time
@@ -81,7 +81,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.onlyEx(item['connected'])
             elif item['class'] == 'initialize':
-                envi = {'np':np, 'toggle':toggle, 't':bintorch}
+                envi = {'np':np, 'toggle':toggle, 't':torch}
                 exec(self.varCode, envi)
             elif item['class'] == 'loopblock':
                 if 'body' in item and 'text' in item:
@@ -91,7 +91,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
     def initialize(self):
         global envi
         self.parseInitialize()
-        envi = {'np':np, 'toggle':toggle, 't':bintorch}
+        envi = {'np':np, 'toggle':toggle, 't':torch}
         exec(self.varCode, envi)
                 
     def parseInitialize(self):
