@@ -1,11 +1,11 @@
-# Cascade - A visual machine learning framework (mockup)
+# Cascade: A visual machine learning framework (mockup)
 
 - Visually arrange a computational graph in the web-based frontend and perform computations on the backend (similar to Jupyter)
 - A demo version lets you try it out without the backend - using pyodide to emulate python in javascript 
 - Arbitrary python code can be executed
 - Many specific features are possible: Dynamic resource allocation, a history of training runs, smart hyperparameter management and more...
 
-##Purpose
+## Purpose
 In the current state this demo is not capable of making workflows more productive. The aim is to showcase a
 different way of setting up machine learning pipelines. In an ideal world, tasks such as managing devices, tracking
 hyperparameter choices and model backups could be handled by a framework instead of being done by every data
