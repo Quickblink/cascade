@@ -25,13 +25,13 @@ exhttp.onreadystatechange = function() {
 };
 
 routineButton.addEventListener('click', function () {
-    exhttp.open("POST", "http://localhost:3000", true);
+    exhttp.open("POST", document.URL, true);
     exhttp.send(JSON.stringify({type:"routine"}));
     statusText.innerText = 'Running...'
 });
 
 document.getElementById('initializeButton').addEventListener('click', function () {
-    exhttp.open("POST", "http://localhost:3000", true);
+    exhttp.open("POST", document.URL, true);
     exhttp.send(JSON.stringify({type:"initialize"}));
 });
 

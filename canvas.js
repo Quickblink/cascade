@@ -174,7 +174,7 @@ const build = {
 
             let exhttp = new XMLHttpRequest();
             button.onclick = function() {
-                exhttp.open("POST", "http://localhost:3000", true);
+                exhttp.open("POST", document.URL, true);
                 exhttp.send(JSON.stringify({type:"execute", body:{id: d.id}}));
             };
             exhttp.onreadystatechange = function() {
