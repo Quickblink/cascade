@@ -1,8 +1,8 @@
 import http.server
 import socketserver
 from http import HTTPStatus
-import autograd.numpy as np
-import bintorch as torch
+import numpy as np
+import torch
 import json
 import os
 import time
