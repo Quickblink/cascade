@@ -3,7 +3,7 @@ import autograd.numpy as np
 import bintorch as torch
 import json
 import time
-from scipy.special import erf
+from math import erf
 
 PORT = 3000
 
